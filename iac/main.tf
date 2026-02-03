@@ -10,8 +10,8 @@ data "aws_s3_bucket" "deployment" {
 
 # Use the existing bucket via data source
 locals {
-  s3_bucket_id  = data.data.aws_s3_bucket.deployment.id
-  s3_bucket_arn = data.data.aws_s3_bucket.deployment.arn
+  s3_bucket_id  = data.aws_s3_bucket.deployment.id
+  s3_bucket_arn = data.aws_s3_bucket.deployment.arn
 }
 
 # Block public access settings
