@@ -25,7 +25,6 @@ provider "aws" {
       Project     = "github-actions-exercise"
       Environment = "production"
       ManagedBy   = "terraform"
-      CreatedDate = timestamp()
     }
   }
 }
