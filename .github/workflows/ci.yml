@@ -1,0 +1,31 @@
+name: CI - Test Variables & Secrets
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [ main ]
+
+jobs:
+  test-variables-and-secrets:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Test GitHub Variable
+        run: |
+          echo "Testing GitHub Variable:"
+          echo "MEINEVAR = ${{ vars.MEINEVAR }}"
+
+      - name: Test GitHub Secret (masked)
+        run: |
+          echo "Testing GitHub Secret (will be masked in logs):"
+          echo "TEST_SECRET = ${{ secrets.TEST_SECRET }}"
+
+      - name: Display environment info
+        run: |
+          echo "Runner OS: ${{ runner.os }}"
+          echo "GitHub Actor: ${{ github.actor }}"
+          echo "Repository: ${{ github.repository }}"
+          echo "Branch: ${{ github.ref }}"
