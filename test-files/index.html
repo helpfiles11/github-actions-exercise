@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GitHub Actions Exercise - Part 1</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GitHub Actions Exercise</h1>
+        <h2>Part 1: AWS OIDC + S3 Deployment</h2>
+        <p>This file was deployed via GitHub Actions!</p>
+        <p>Timestamp: <span id="timestamp"></span></p>
+        <ul>
+            <li>✅ GitHub Actions workflow configured</li>
+            <li>✅ AWS OIDC authentication working</li>
+            <li>✅ Files synced to S3</li>
+            <li>✅ Served via CloudFront (coming in Part 2)</li>
+        </ul>
+    </div>
+    <script>
+        document.getElementById('timestamp').textContent = new Date().toISOString();
+    </script>
+</body>
+</html>

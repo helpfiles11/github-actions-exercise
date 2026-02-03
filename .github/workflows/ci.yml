@@ -5,6 +5,10 @@ on:
   push:
     branches: [ main ]
 
+permissions:
+  id-token: write
+  contents: read
+
 jobs:
   test-variables-and-secrets:
     runs-on: ubuntu-latest
@@ -29,3 +33,33 @@ jobs:
           echo "GitHub Actor: ${{ github.actor }}"
           echo "Repository: ${{ github.repository }}"
           echo "Branch: ${{ github.ref }}"
+
+  deploy-to-s3:
+    needs: test-variables-and-secrets
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: us-east-1
+
+      - name: Verify AWS credentials
+        run: |
+          echo "AWS Account ID:"
+          aws sts get-caller-identity --query "Account" --output text
+
+      - name: Sync test files to S3
+        run: |
+          echo "Syncing test files to S3..."
+          aws s3 sync test-files/ s3://github-actions-exercise-695471606318/ --delete
+          echo "Sync completed!"
+
+      - name: List S3 bucket contents
+        run: |
+          echo "S3 bucket contents:"
+          aws s3 ls s3://github-actions-exercise-695471606318/ --recursive
