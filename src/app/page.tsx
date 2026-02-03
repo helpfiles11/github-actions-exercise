@@ -50,7 +50,7 @@ export default function Home() {
 
       <section className="bg-white bg-opacity-10 backdrop-blur-md rounded-lg p-8">
         <h3 className="text-2xl font-bold text-white mb-6">
-          What's Included
+          What&apos;s Included
         </h3>
         <ul className="text-white space-y-3">
           <li className="flex items-center">
