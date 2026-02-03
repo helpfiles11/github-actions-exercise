@@ -1,0 +1,141 @@
+name: Deploy Next.js App
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    name: Test & Lint
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'src/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./src
+        run: npm ci
+
+      - name: Run ESLint
+        working-directory: ./src
+        run: npm run lint
+
+      - name: Run tests
+        working-directory: ./src
+        run: npm test -- --coverage --watchAll=false
+
+      - name: Test build
+        working-directory: ./src
+        run: npm run build
+
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    name: Build & Upload Artifacts
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          cache-dependency-path: 'src/package-lock.json'
+
+      - name: Install dependencies
+        working-directory: ./src
+        run: npm ci
+
+      - name: Build Next.js app
+        working-directory: ./src
+        run: npm run build
+
+      - name: Prepare build artifacts
+        run: |
+          mkdir -p build-artifacts
+          cp -r src/.next/standalone/* build-artifacts/ || true
+          cp -r src/public build-artifacts/ || true
+          # Create a startup script for standalone mode
+          cat > build-artifacts/start.sh << 'EOF'
+          #!/bin/bash
+          cd /app
+          exec node server.js
+          EOF
+          chmod +x build-artifacts/start.sh
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nextjs-build
+          path: build-artifacts/
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    name: Deploy to S3 & Invalidate CloudFront
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: nextjs-build
+          path: ./build-output
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: arn:aws:iam::695471606318:role/github-actions-s3-sync-role
+          aws-region: us-east-1
+
+      - name: Sync build to S3
+        run: |
+          echo "Syncing Next.js build to S3..."
+          aws s3 sync build-output/ s3://github-actions-exercise-695471606318/ \
+            --delete \
+            --cache-control "public, max-age=3600" \
+            --exclude ".next/cache/*"
+          echo "Sync completed!"
+
+      - name: List S3 bucket contents
+        run: |
+          echo "S3 bucket contents after deploy:"
+          aws s3 ls s3://github-actions-exercise-695471606318/ --recursive | head -20
+
+      - name: Invalidate CloudFront cache
+        if: success()
+        run: |
+          echo "Invalidating CloudFront cache..."
+          # Note: Replace with actual distribution ID when CloudFront is set up
+          # aws cloudfront create-invalidation \
+          #   --distribution-id ${{ vars.CLOUDFRONT_DISTRIBUTION_ID }} \
+          #   --paths "/*"
+          echo "CloudFront invalidation would run here (setup in Step 14)"
+
+      - name: Deployment summary
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo ""
+          echo "Build deployed to: s3://github-actions-exercise-695471606318/"
+          echo "Website: http://github-actions-exercise-695471606318.s3-website-us-east-1.amazonaws.com"

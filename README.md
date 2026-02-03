@@ -2,6 +2,9 @@
 
 Complete CI/CD pipeline with GitHub Actions, AWS OIDC, S3 deployment, and CloudFront CDN.
 
+## Build Status
+
+![CI Status](https://github.com/helpfiles11/github-actions-exercise/actions/workflows/ci.yml/badge.svg)
 ![Deploy Status](https://github.com/helpfiles11/github-actions-exercise/actions/workflows/deploy.yml/badge.svg)
 
 ## Project Structure
