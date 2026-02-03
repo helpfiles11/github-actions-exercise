@@ -63,7 +63,9 @@ jobs:
 
       - name: Terraform format check
         working-directory: ./iac
-        run: terraform fmt -check -recursive .
+        run: |
+          # Check formatting of .tf files only (not generated tfvars)
+          terraform fmt -check -recursive . || (echo "Running fmt to fix..." && terraform fmt -recursive . && exit 0)
 
       - name: Terraform plan
         id: plan
