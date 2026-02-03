@@ -46,11 +46,11 @@ jobs:
         working-directory: ./iac
         run: |
           cat > terraform.tfvars << EOF
-          aws_region         = "${{ env.AWS_REGION }}"
-          aws_account_id     = "695471606318"
-          github_repo_owner  = "helpfiles11"
-          github_repo_name   = "github-actions-exercise"
-          cloudfront_price_class = "PriceClass_100"
+          aws_region              = "${{ env.AWS_REGION }}"
+          aws_account_id          = "695471606318"
+          github_repo_owner       = "helpfiles11"
+          github_repo_name        = "github-actions-exercise"
+          cloudfront_price_class  = "PriceClass_100"
           EOF
 
       - name: Terraform init
@@ -63,7 +63,7 @@ jobs:
 
       - name: Terraform format check
         working-directory: ./iac
-        run: terraform fmt -check -recursive
+        run: terraform fmt -check -recursive .
 
       - name: Terraform plan
         id: plan
@@ -128,11 +128,11 @@ jobs:
         working-directory: ./iac
         run: |
           cat > terraform.tfvars << EOF
-          aws_region         = "${{ env.AWS_REGION }}"
-          aws_account_id     = "695471606318"
-          github_repo_owner  = "helpfiles11"
-          github_repo_name   = "github-actions-exercise"
-          cloudfront_price_class = "PriceClass_100"
+          aws_region              = "${{ env.AWS_REGION }}"
+          aws_account_id          = "695471606318"
+          github_repo_owner       = "helpfiles11"
+          github_repo_name        = "github-actions-exercise"
+          cloudfront_price_class  = "PriceClass_100"
           EOF
 
       - name: Download plan artifact
