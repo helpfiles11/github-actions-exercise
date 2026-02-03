@@ -1,11 +1,11 @@
 output "s3_bucket_name" {
   description = "S3 bucket name"
-  value       = aws_s3_bucket.deployment.id
+  value       = data.aws_s3_bucket.deployment.id
 }
 
 output "s3_bucket_arn" {
   description = "S3 bucket ARN"
-  value       = aws_s3_bucket.deployment.arn
+  value       = data.aws_s3_bucket.deployment.arn
 }
 
 output "s3_website_endpoint" {
@@ -35,5 +35,5 @@ output "github_oidc_role_name" {
 
 output "oidc_provider_arn" {
   description = "OIDC provider ARN"
-  value       = aws_iam_openid_connect_provider.github.arn
+  value       = data.aws_iam_openid_connect_provider.github.arn
 }

@@ -1,21 +1,22 @@
 # ==========================================
-# S3 Bucket for Deployment
+# S3 Bucket for Deployment (Data Source)
 # ==========================================
+# Since the S3 bucket was created manually in Part 1,
+# we use a data source to reference it and manage its configuration
 
-resource "aws_s3_bucket" "deployment" {
+data "aws_s3_bucket" "deployment" {
   bucket = "${var.project_name}-${var.aws_account_id}"
+}
 
-  tags = merge(
-    var.tags,
-    {
-      Name = "${var.project_name}-deployment"
-    }
-  )
+# Use the existing bucket via data source
+locals {
+  s3_bucket_id  = data.data.aws_s3_bucket.deployment.id
+  s3_bucket_arn = data.data.aws_s3_bucket.deployment.arn
 }
 
 # Block public access settings
 resource "aws_s3_bucket_public_access_block" "deployment" {
-  bucket = aws_s3_bucket.deployment.id
+  bucket = data.aws_s3_bucket.deployment.id
 
   block_public_acls       = false
   block_public_policy     = false
@@ -25,7 +26,7 @@ resource "aws_s3_bucket_public_access_block" "deployment" {
 
 # Static website hosting configuration
 resource "aws_s3_bucket_website_configuration" "deployment" {
-  bucket = aws_s3_bucket.deployment.id
+  bucket = data.aws_s3_bucket.deployment.id
 
   index_document {
     suffix = "index.html"
@@ -40,7 +41,7 @@ resource "aws_s3_bucket_website_configuration" "deployment" {
 
 # Bucket policy for public read access
 resource "aws_s3_bucket_policy" "deployment" {
-  bucket = aws_s3_bucket.deployment.id
+  bucket = data.aws_s3_bucket.deployment.id
 
   policy = jsonencode({
     Version = "2012-10-17"
@@ -52,7 +53,7 @@ resource "aws_s3_bucket_policy" "deployment" {
           AWS = "*"
         }
         Action   = "s3:GetObject"
-        Resource = "${aws_s3_bucket.deployment.arn}/*"
+        Resource = "${data.aws_s3_bucket.deployment.arn}/*"
       }
     ]
   })
@@ -124,20 +125,17 @@ resource "aws_cloudfront_distribution" "deployment" {
 }
 
 # ==========================================
-# GitHub OIDC Provider
+# GitHub OIDC Provider (Data Source)
 # ==========================================
+# Since the OIDC provider was created manually in Part 1,
+# we use a data source to reference it instead of creating it
 
-resource "aws_iam_openid_connect_provider" "github" {
-  url             = "https://token.actions.githubusercontent.com"
-  client_id_list  = ["sts.amazonaws.com"]
-  thumbprint_list = [var.github_oidc_thumbprint]
+data "aws_iam_openid_connect_provider" "github" {
+  url = "https://token.actions.githubusercontent.com"
+}
 
-  tags = merge(
-    var.tags,
-    {
-      Name = "github-oidc-provider"
-    }
-  )
+locals {
+  github_oidc_arn = data.aws_iam_openid_connect_provider.github.arn
 }
 
 # ==========================================
@@ -153,7 +151,7 @@ resource "aws_iam_role" "github_actions" {
       {
         Effect = "Allow"
         Principal = {
-          Federated = aws_iam_openid_connect_provider.github.arn
+          Federated = local.github_oidc_arn
         }
         Action = "sts:AssumeRoleWithWebIdentity"
         Condition = {
@@ -197,8 +195,8 @@ resource "aws_iam_role_policy" "s3_access" {
           "s3:ListBucket"
         ]
         Resource = [
-          aws_s3_bucket.deployment.arn,
-          "${aws_s3_bucket.deployment.arn}/*"
+          data.aws_s3_bucket.deployment.arn,
+          "${data.aws_s3_bucket.deployment.arn}/*"
         ]
       },
       {
