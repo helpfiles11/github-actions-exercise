@@ -1,0 +1,23 @@
+# Copy this file to terraform.tfvars and update the values
+# DO NOT commit terraform.tfvars to version control
+
+aws_region       = "us-east-1"
+project_name     = "github-actions-exercise"
+aws_account_id   = "695471606318"
+github_repo_owner = "helpfiles11"
+github_repo_name = "github-actions-exercise"
+
+# GitHub OIDC thumbprint (if different from default)
+github_oidc_thumbprint = "2b18947a6a9fc7764fd8b5fb18a863b0c6dac24f"
+
+# CloudFront pricing: PriceClass_100, PriceClass_200, or PriceClass_All
+cloudfront_price_class = "PriceClass_100"
+
+# Optional: Enable S3 backend for Terraform state
+enable_s3_backend = false
+
+# Optional: Additional tags
+tags = {
+  CostCenter = "engineering"
+  Owner      = "platform-team"
+}

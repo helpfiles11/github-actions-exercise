@@ -1,0 +1,32 @@
+# Terraform files
+terraform.tfstate
+terraform.tfstate.*
+.terraform/
+.terraform.lock.hcl
+crash.log
+crash.*.log
+
+# Local .tfvars files
+*.tfvars
+*.tfvars.json
+!terraform.tfvars.example
+
+# Ignore override files (as they are often used to override resources locally)
+override.tf
+override.tf.json
+*_override.tf
+*_override.tf.json
+
+# IDE
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Plan files
+*.tfplan
+plan.out
+
+# Logs
+*.log
